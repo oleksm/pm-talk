@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+  <filter>
+    <filter-name>guiceFilter</filter-name>
+    <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
+  </filter>
+
+  <!--<filter>-->
+    <!--<filter-name>startFilter</filter-name>-->
+    <!--<filter-class>tech.oleks.pmtalk.web.StartFilter</filter-class>-->
+  <!--</filter>-->
+
+  <!--<filter-mapping>-->
+    <!--<filter-name>startFilter</filter-name>-->
+    <!--<url-pattern>/*</url-pattern>-->
+  <!--</filter-mapping>-->
+
+  <!--<servlet>-->
+    <!--<servlet-name>hello</servlet-name>-->
+    <!--<servlet-class>com.example.appengine.helloworld.HelloServlet</servlet-class>-->
+  <!--</servlet>-->
+  <!--<servlet-mapping>-->
+    <!--<servlet-name>hello</servlet-name>-->
+    <!--<url-pattern>/</url-pattern>-->
+  <!--</servlet-mapping>-->
+
+
+  <filter-mapping>
+    <filter-name>guiceFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <listener>
+    <listener-class>tech.oleks.pmtalk.guice.MyGuiceServletContextListener</listener-class>
+  </listener>
+
+  <welcome-file-list>
+    <welcome-file>form.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>
