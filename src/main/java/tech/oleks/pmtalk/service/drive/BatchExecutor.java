@@ -55,21 +55,23 @@ public class BatchExecutor {
     /**
      *
      * @param fileId
-     * @param domain
+     * @param domains
      * @param role
      * @return
      * @throws IOException
      */
-    public BatchExecutor addDomainPermission(String fileId, String domain, String role) throws IOException {
-        drive.permissions().create(fileId, new Permission()
-                .setAllowFileDiscovery(false)
-                .setExpirationTime(Ut.toDateTime(new org.joda.time.DateTime().plusDays(14)))
-                .setType("domain")
-                .setDomain(domain)
-                .setRole(role))
-                .setSendNotificationEmail(false)
-                .setFields("id")
-                .queue(batch, new GenericJsonBatchCallback());
+    public BatchExecutor addDomainPermission(String fileId, String[] domains, String role) throws IOException {
+        for (String domain: domains) {
+            drive.permissions().create(fileId, new Permission()
+                    .setAllowFileDiscovery(false)
+                    .setExpirationTime(Ut.toDateTime(new org.joda.time.DateTime().plusDays(14)))
+                    .setType("domain")
+                    .setDomain(domain)
+                    .setRole(role))
+                    .setSendNotificationEmail(false)
+                    .setFields("id")
+                    .queue(batch, new GenericJsonBatchCallback());
+        }
         return this;
     }
 

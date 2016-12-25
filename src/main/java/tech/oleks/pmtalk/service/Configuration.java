@@ -27,6 +27,7 @@ public class Configuration {
     String reportRequsitesT;
     String reportCodingT;
     String[] shareWithPeople;
+    String[] shareWithDomains;
     String analyticsId;
     String emailSubjectT;
 
@@ -204,5 +205,13 @@ public class Configuration {
 
     public void setShareWithPeople(String[] shareWithPeople) {
         this.shareWithPeople = shareWithPeople;
+    }
+
+    public String[] getShareWithDomains() {
+        return shareWithDomains;
+    }
+
+    public void setShareWithDomains(String[] shareWithDomains) {
+        this.shareWithDomains = shareWithDomains;
     }
 }

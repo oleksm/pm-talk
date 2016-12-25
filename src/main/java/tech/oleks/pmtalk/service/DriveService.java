@@ -75,8 +75,7 @@ public class DriveService extends ManagedService {
                 .moveToFolder(codingId, folderId, driveMap.getPmTalkId())
                 .addPublicPermission(codingId, "writer")
                 .moveToFolder(resumeId, folderId, driveMap.getPmTalkId())
-                .addDomainPermission(resumeId, "epam.com", "commenter")
-                .addDomainPermission(resumeId, "google.com", "commenter")
+                .addDomainPermission(resumeId, config.getShareWithDomains(), "commenter")
                 .addUserPermission(resumeId, config.getShareWithPeople(), false)
                 .copyFile(reportTId, folderId, config.getReportTemplateName().replaceAll("%NAME%", candidate), "reportId")
                 .execute();
