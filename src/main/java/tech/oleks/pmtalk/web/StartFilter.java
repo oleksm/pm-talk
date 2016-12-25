@@ -11,6 +11,7 @@ import tech.oleks.pmtalk.util.ConfigurationLoader;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Created by alexm on 12/16/16.
@@ -21,6 +22,8 @@ public class StartFilter implements Filter {
     @Inject ApplicationService application;
     @Inject Configuration config;
     Object lock = new Object();
+
+    final Logger log = Logger.getLogger(getClass().getName());
 
 
     @Override
@@ -37,11 +40,11 @@ public class StartFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (!application.isStarted()) {
             synchronized (lock) {
-                System.out.println("Initializing Application...");
+                log.info("Initializing Application...");
                 if (!application.isStarted()) {
                     application.setServletContext(((HttpServletRequest)request).getSession().getServletContext());
                     application.start();
-                    System.out.println("Initializing Application... DONE.");
+                    log.info("Initializing Application... DONE.");
                 }
             }
         }

@@ -1,5 +1,6 @@
 package tech.oleks.pmtalk.util;
 
+import org.apache.commons.lang3.StringUtils;
 import tech.oleks.pmtalk.service.Configuration;
 
 import java.beans.BeanInfo;
@@ -27,11 +28,15 @@ public class ConfigurationLoader {
         }
         for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
             String value = props.getProperty(propertyDescriptor.getName());
-            if (value != null && propertyDescriptor.getWriteMethod() != null) {
+            if (StringUtils.isNotBlank(value) && propertyDescriptor.getWriteMethod() != null) {
+                Object v = value;
+                if (propertyDescriptor.getPropertyType().isArray()) {
+                    v = value.split("[\\s,]+");
+                }
                 try {
-                    propertyDescriptor.getWriteMethod().invoke(config, value);
+                    propertyDescriptor.getWriteMethod().invoke(config, v);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("Failed to write property " + propertyDescriptor.getName(), e);
                 }
             }
         }

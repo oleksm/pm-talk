@@ -75,6 +75,11 @@ Copyright 2015 Google Inc. All Rights Reserved.
     </dependency>
     <dependency>
       <groupId>com.google.apis</groupId>
+      <artifactId>google-api-services-gmail</artifactId>
+      <version>v1-rev53-1.22.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.apis</groupId>
       <artifactId>google-api-services-drive</artifactId>
       <version>v3-rev52-1.22.0</version>
     </dependency>
@@ -108,7 +113,6 @@ Copyright 2015 Google Inc. All Rights Reserved.
       <artifactId>commons-beanutils</artifactId>
       <version>1.9.3</version>
     </dependency>
-
   </dependencies>
 
   <build>

@@ -17,6 +17,8 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.inject.Inject;
@@ -41,6 +43,7 @@ public class GoogleApiService extends ManagedService {
     private Calendar calendar;
     private Sheets sheets;
     private Credential credential;
+    private Gmail gmail;
 
     /** Global instance of the HTTP transport. */
     private HttpTransport httpTransport;
@@ -63,7 +66,8 @@ public class GoogleApiService extends ManagedService {
      * If modifying these scopes, delete your previously saved credentials
      * at ~/.credentials/drive-java-quickstart
      */
-    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE, CalendarScopes.CALENDAR, SheetsScopes.SPREADSHEETS);
+    private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE, CalendarScopes.CALENDAR,
+            SheetsScopes.SPREADSHEETS, GmailScopes.MAIL_GOOGLE_COM);
 
     public GoogleApiService() throws GeneralSecurityException, IOException {
         httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -96,7 +100,11 @@ public class GoogleApiService extends ManagedService {
                 .setApplicationName(config.getApplicationName())
                 .build();
 
-        System.out.println("Api Service Up and Running");
+         gmail = new Gmail.Builder(httpTransport, JSON_FACTORY, credential)
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+
+        log.info("Api Service Up and Running");
     }
 
     public GoogleAuthorizationCodeFlow initializeFlow() throws IOException {
@@ -109,12 +117,12 @@ public class GoogleApiService extends ManagedService {
         ls.add(new CredentialRefreshListener() {
             @Override
             public void onTokenResponse(Credential credential, TokenResponse tokenResponse) throws IOException {
-                System.out.println("onTokenResponse!");
+                log.info("onTokenResponse!");
             }
 
             @Override
             public void onTokenErrorResponse(Credential credential, TokenErrorResponse tokenErrorResponse) throws IOException {
-                System.out.println("onTokenResponse ERROR! " + tokenErrorResponse.getError());
+                log.info("onTokenResponse ERROR! " + tokenErrorResponse.getError());
             }
         });
 
@@ -157,5 +165,13 @@ public class GoogleApiService extends ManagedService {
 
     public void setSheets(Sheets sheets) {
         this.sheets = sheets;
+    }
+
+    public Gmail getGmail() {
+        return gmail;
+    }
+
+    public void setGmail(Gmail gmail) {
+        this.gmail = gmail;
     }
 }

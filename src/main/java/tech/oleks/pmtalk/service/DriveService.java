@@ -1,19 +1,25 @@
 package tech.oleks.pmtalk.service;
 
+
 import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
-import com.google.api.services.drive.model.Permission;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.joda.time.DateTime;
 import tech.oleks.pmtalk.bean.DriveMap;
 import tech.oleks.pmtalk.bean.FileUpload;
+import tech.oleks.pmtalk.bean.Order;
 
-import javax.annotation.PostConstruct;
+import tech.oleks.pmtalk.service.drive.BatchExecutor;
+
+import tech.oleks.pmtalk.util.Ut;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static tech.oleks.pmtalk.util.Ut.notNull;
 
 /**
  * Created by alexm on 12/9/16.
@@ -27,21 +33,72 @@ public class DriveService extends ManagedService {
 
     @Override
     public void start() throws IOException {
-        System.out.println("Starting Drive Service...");
+        log.info("Starting Drive Service...");
         driveMap = exploreDrive();
-        System.out.println("Starting Drive Service... DONE.");
+        log.info("Starting Drive Service... DONE.");
+    }
+
+    /**
+     *
+     * @param o
+     * @throws IOException
+     */
+    public void minimal(Order o) throws IOException {
+        String candidate = o.getCandidate();
+        String codingTId = driveMap.getCodingId();
+        String pmTalkId = driveMap.getPmTalkId();
+
+        BatchExecutor batch = new BatchExecutor(api.getDrive())
+                .copyFile(codingTId, pmTalkId, config.getCodingTemplateName().replaceAll("%NAME%", candidate), "codingId")
+                .execute();
+
+        o.setCodingId(batch.getResult("codingId"));
+
+
+        String resumeId = uploadResume(o.getResume());
+        o.setResumeId(resumeId);
+    }
+
+    /**
+     *
+     * @param o
+     * @throws IOException
+     */
+    public String complete(Order o) throws IOException {
+        String candidate = o.getCandidate();
+        String folderId = createFolder(candidate);
+        String codingId = o.getCodingId();
+        String resumeId = o.getResumeId();
+        String reportTId = driveMap.getReportId();
+
+        BatchExecutor batch = new BatchExecutor(api.getDrive())
+                .moveToFolder(codingId, folderId, driveMap.getPmTalkId())
+                .addPublicPermission(codingId, "writer")
+                .moveToFolder(resumeId, folderId, driveMap.getPmTalkId())
+                .addDomainPermission(resumeId, "epam.com", "commenter")
+                .addDomainPermission(resumeId, "google.com", "commenter")
+                .addUserPermission(resumeId, config.getShareWithPeople(), false)
+                .copyFile(reportTId, folderId, config.getReportTemplateName().replaceAll("%NAME%", candidate), "reportId")
+                .execute();
+
+        String reportId = batch.getResult("reportId");
+
+        new BatchExecutor(api.getDrive())
+                .addUserPermission(reportId, config.getShareWithPeople(), true)
+                .execute();
+
+        return reportId;
     }
 
     /**
      *
      * @param resume
-     * @param folderId
-     * @return https://docs.google.com/document/d/1Fyl2mjAAmTyRo-0FV_fGdySlmJ0jSQSQF5aw3XnSCAA/edit?usp=sharing
+     * @return 1Fyl2mjAAmTyRo-0FV_fGdySlmJ0jSQSQF5aw3XnSCAA
      * @throws IOException
      */
-    public String uploadResume(FileUpload resume, String folderId) throws IOException {
+    public String uploadResume(FileUpload resume) throws IOException {
         List<String> parents = new ArrayList<>();
-        parents.add(folderId);
+        parents.add(driveMap.getPmTalkId());
         File file = new File();
         file.setName(resume.getFileName());
         file.setParents(parents);
@@ -50,36 +107,28 @@ public class DriveService extends ManagedService {
         File result = api.getDrive().files().create(file, content)
                 .setFields("id")
                 .execute();
-        return config.getShareResumeLinkT().replaceAll("%FILE_ID%", result.getId());
+        return notNull(result.getId(), "Upload Resume");
     }
 
     /**
      *
-     * @param folderId
      * @param candidate
-     * @return https://docs.google.com/document/d/1Fyl2mjAAmTyRo-0FV_fGdySlmJ0jSQSQF5aw3XnSCAA/edit?usp=sharing
+     * @return 1Fyl2mjAAmTyRo-0FV_fGdySlmJ0jSQSQF5aw3XnSCAA
+     * @throws IOException
      */
-    public String copyCodingDoc(String folderId, String candidate) throws IOException {
+    public String createCodingDoc(String candidate) throws IOException {
         String name = config.getCodingTemplateName().replaceAll("%NAME%", candidate);
         List<String> parents = new ArrayList<>();
-        parents.add(folderId);
+        parents.add(driveMap.getPmTalkId());
         File file = new File();
         file.setName(name);
         file.setParents(parents);
         File copied = api.getDrive().files().copy(driveMap.getCodingId(), file)
                 .setFields("id")
                 .execute();
-        notNull(copied.getId(), "Copy Coding Doc " + candidate);
-        api.getDrive().permissions().create(copied.getId(), new Permission()
-                .setAllowFileDiscovery(false)
-                .setExpirationTime(toDateTime(new org.joda.time.DateTime().plusDays(14)))
-                .setType("anyone")
-                .setRole("writer"))
-                .setFields("id")
-                .execute();
-        System.out.println(toDateTime(new DateTime().plusDays(14)));
-        return config.getShareLinkTemplate().replaceAll("%FILE_ID%", copied.getId());
+        return notNull(copied.getId(), "Copy Coding Doc " + candidate);
     }
+
 
     /**
      *
@@ -117,7 +166,7 @@ public class DriveService extends ManagedService {
         File file = api.getDrive().files().create(folder)
                 .setFields("id")
                 .execute();
-        return notNull(file.getId(), name);
+        return Ut.notNull(file.getId(), name);
     }
 
     /**
@@ -148,7 +197,7 @@ public class DriveService extends ManagedService {
         driveMap.setReportId(reportId);
         driveMap.setTemplateId(templateId);
 
-        System.out.println("Drive Mapped");
+        log.info("Drive Mapped");
         return driveMap;
     }
 
@@ -160,7 +209,7 @@ public class DriveService extends ManagedService {
      * @return
      */
     private String extract(FileList fl, String fn, String pfn) {
-        System.out.println(String.format("Extracting %s from result %d", fn, fl.getFiles().size()));
+        log.info(String.format("Extracting %s from result %d", fn, fl.getFiles().size()));
         for (File f: fl.getFiles()) {
             if (fn.equalsIgnoreCase(f.getName())) {
                 if (pfn == null || f.getParents().contains(pfn)) {

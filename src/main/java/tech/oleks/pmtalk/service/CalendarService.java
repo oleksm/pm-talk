@@ -6,9 +6,9 @@ import com.google.api.services.calendar.model.EventDateTime;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.joda.time.DateTime;
+import tech.oleks.pmtalk.util.Ut;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
 
 @Singleton
 public class CalendarService extends ManagedService {
@@ -32,11 +32,11 @@ public class CalendarService extends ManagedService {
         DateTime start = new DateTime().plusDays(5);
 
         EventDateTime eventStart = new EventDateTime()
-                .setDateTime(toDateTime(start));
+                .setDateTime(Ut.toDateTime(start));
         event.setStart(eventStart);
 
         EventDateTime eventEnd = new EventDateTime()
-                .setDateTime(toDateTime(start.plusHours(1)));
+                .setDateTime(Ut.toDateTime(start.plusHours(1)));
         event.setEnd(eventEnd);
 
         String calendarId = "primary";
@@ -45,22 +45,20 @@ public class CalendarService extends ManagedService {
                 .insert(calendarId, event)
                 .execute();
 
-        return notNull(result.getHangoutLink(), "Hangout Link - " + result.getSummary());
+        return Ut.notNull(result.getHangoutLink(), "Hangout Link - " + result.getSummary());
     }
 
     /**
      *
      * @param codingLink
-     * @param reportId
      * @param resumeLink
      * @return
      */
-    public String getEventMessage(String candidate, String codingLink, String reportId, String resumeLink) {
+    public String getEventMessage(String candidate, String codingLink, String resumeLink) {
         return String.format("Candidate: %s\n" +
                 "Coding Doc: %s\n" +
-                "Resume: %s" +
-                "Report: %s",
-                candidate, codingLink, resumeLink, config.getShareLinkTemplate().replaceAll("%FILE_ID%", reportId)
+                "Resume: %s",
+                candidate, codingLink, resumeLink
         );
     }
 }

@@ -27,6 +27,7 @@ public class ApplicationService extends ManagedService {
             injector.getInstance(Key.get(DriveService.class)).start();
             injector.getInstance(Key.get(CalendarService.class)).start();
             injector.getInstance(Key.get(SheetService.class)).start();
+            injector.getInstance(Key.get(GmailService.class)).start();
             started = true;
         }
     }

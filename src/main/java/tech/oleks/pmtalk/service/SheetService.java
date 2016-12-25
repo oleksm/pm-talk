@@ -6,6 +6,8 @@ import com.google.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import tech.oleks.pmtalk.bean.Order;
+import tech.oleks.pmtalk.util.Ut;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,18 +26,24 @@ public class SheetService extends ManagedService {
 
     @Override
     public void start() throws IOException {
-        System.out.println("SheetService start...");
+        log.info("SheetService start...");
         String fileId = driveService.getDriveMap().getReportId();
 
         valueRange = api.getSheets().spreadsheets().values()
                 .get(fileId, config.getSheetRange())
                 .execute();
 
-        System.out.println("SheetService start DONE.");
+        log.info("SheetService start DONE.");
     }
 
-    public void fillInReport(String fileId, String resumeLink, String meetingLink, String positionLink,
-                             String codingLink) throws IOException {
+    /**
+     *
+     * @param fileId
+     * @param o
+     * @return
+     * @throws IOException
+     */
+    public String fillInReport(String fileId, Order o) throws IOException {
 
         List<List<Object>> values = new ArrayList<>();
         for (List<Object> row: valueRange.getValues()) {
@@ -46,16 +54,19 @@ public class SheetService extends ManagedService {
                     r.add(new DateTime().withZone(DateTimeZone.forID("America/Los_Angeles")).toString("dd/MM/yyyy h:mm:ss a z"));
                 } else
                 if (StringUtils.equalsIgnoreCase(v, config.getReportResumeT())) {
-                    r.add(resumeLink);
+                    r.add(Ut.getLink(config.getShareResumeLinkT(), o.getResumeId()));
+                } else
+                if (StringUtils.equalsIgnoreCase(v, config.getReportCandidateT())) {
+                    r.add(o.getCandidate());
                 } else
                 if (StringUtils.equalsIgnoreCase(v, config.getReportMeetingT())) {
-                    r.add(meetingLink);
+                    r.add(o.getMeetingLink());
                 } else
                 if (StringUtils.equalsIgnoreCase(v, config.getReportStaffingDeskT())) {
-                    r.add(positionLink);
+                    r.add(o.getStaffingLink());
                 } else
                 if (StringUtils.equalsIgnoreCase(v, config.getReportCodingT())) {
-                    r.add(codingLink);
+                    r.add(Ut.getLink(config.getShareLinkTemplate(), o.getCodingId()));
                 }
                 else {
                     r.add(value);
@@ -72,6 +83,8 @@ public class SheetService extends ManagedService {
                 .update(fileId, config.getSheetRange(), range)
                 .setValueInputOption("USER_ENTERED")
                 .execute();
+
+        return config.getShareLinkTemplate().replaceAll("%FILE_ID%", fileId);
     }
 
 }

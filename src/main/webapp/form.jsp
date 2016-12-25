@@ -46,7 +46,7 @@
           <div class="form-group form-group-lg">
             <label class="col-md-2 control-label" for="staffing">Position</label>
             <div class="col-md-8">
-              <input id="staffing" name="staffing" type="text" placeholder="http://" class="form-control input-lg" required="" value="${order.position}">
+              <input id="staffing" name="staffing" type="text" placeholder="http://" class="form-control input-lg" required="" value="${order.staffingLink}">
               <span class="help-block">staffing desk link</span>
             </div>
           </div>

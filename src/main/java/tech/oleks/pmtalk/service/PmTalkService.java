@@ -1,10 +1,14 @@
 package tech.oleks.pmtalk.service;
 
+import com.google.appengine.api.taskqueue.Queue;
+import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.apache.commons.lang3.StringUtils;
 import tech.oleks.pmtalk.bean.FileUpload;
 import tech.oleks.pmtalk.bean.Order;
+import tech.oleks.pmtalk.util.Ut;
 
 import java.io.IOException;
 
@@ -13,40 +17,69 @@ import java.io.IOException;
  */
 
 @Singleton
-public class PmTalkService {
+public class PmTalkService extends  ManagedService {
 
     @Inject DriveService driveService;
     @Inject CalendarService calendarService;
     @Inject SheetService sheetService;
+    @Inject GmailService gmailService;
 
-    public void initiate(Order order) {
+    /**
+     *
+     * @param order
+     */
+    public void minimal(Order order) {
         FileUpload r = order.getResume();
-        if (StringUtils.isBlank(order.getCandidate()) || StringUtils.isBlank(order.getPosition()) || r == null
+        if (StringUtils.isBlank(order.getCandidate()) || StringUtils.isBlank(order.getStaffingLink()) || r == null
                 || StringUtils.isBlank(r.getFileName())) {
             order.setErrors("Please fill in Candidate, Position and Resume fields");
             return;
         }
 
         try {
-            String folderId = driveService.createFolder(order.getCandidate());
-            String codingLink = driveService.copyCodingDoc(folderId, order.getCandidate());
-            String resumeLink = driveService.uploadResume(order.getResume(), folderId);
-            String reportId = driveService.copyReport(folderId, order.getCandidate());
-            String content = calendarService.getEventMessage(order.getCandidate(), codingLink, reportId, resumeLink);
+            driveService.minimal(order);
+
+            String codingLink = Ut.getLink(config.getShareLinkTemplate(), order.getCodingId());
+            String resumeLink = Ut.getLink(config.getShareResumeLinkT(), order.getResumeId());
+
+            String content = calendarService.getEventMessage(order.getCandidate(), codingLink, resumeLink);
             String meetingLink = calendarService.createEvent(order.getCandidate(), content);
-            sheetService.fillInReport(reportId, resumeLink, meetingLink, order.getPosition(), codingLink);
 
             order.setCodingLink(codingLink);
             order.setMeetingLink(meetingLink);
-            order.setFolderId(folderId);
-            submitOrder(order);
+
+            enqueue(order);
         } catch (IOException e) {
             e.printStackTrace();
             order.setErrors("Looks like something went wrong. Sorry about that. Error: " + e.getMessage());
         }
     }
 
-    public void submitOrder(Order o) {
+    /**
+     *
+     * @param o
+     * @throws IOException
+     */
+    public void complete(Order o) throws IOException {
 
+        String reportId = driveService.complete(o);
+
+        sheetService.fillInReport(reportId, o);
+//        gmailService.sendMessage(o);
+    }
+
+    /**
+     *
+     * @param o
+     */
+    public void enqueue(Order o) {
+        Queue queue = QueueFactory.getDefaultQueue();
+        queue.add(TaskOptions.Builder.withUrl("/worker")
+                .param("candidate", o.getCandidate())
+                .param("resumeId", o.getResumeId())
+                .param("meetingLink", o.getMeetingLink())
+                .param("staffingLink", o.getStaffingLink())
+                .param("codingId", o.getCodingId())
+        );
     }
 }

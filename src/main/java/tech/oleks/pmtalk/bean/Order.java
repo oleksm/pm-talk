@@ -1,18 +1,31 @@
 package tech.oleks.pmtalk.bean;
 
-import java.io.InputStream;
-
 /**
  * Created by alexm on 12/11/16.
  */
 public class Order {
-    private String folderId;
     private String codingLink;
+    private String codingId;
     private String meetingLink;
     private String candidate;
-    private String position;
+    private String staffingLink;
     private FileUpload resume;
+    private String resumeId;
     String errors;
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "codingLink='" + codingLink + '\'' +
+                ", codingId='" + codingId + '\'' +
+                ", meetingLink='" + meetingLink + '\'' +
+                ", candidate='" + candidate + '\'' +
+                ", staffingLink='" + staffingLink + '\'' +
+                ", resume=" + resume +
+                ", resumeId='" + resumeId + '\'' +
+                ", errors='" + errors + '\'' +
+                '}';
+    }
 
     public String getCodingLink() {
         return codingLink;
@@ -30,14 +43,6 @@ public class Order {
         this.meetingLink = meetingLink;
     }
 
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
-    }
-
     public String getCandidate() {
         return candidate;
     }
@@ -46,12 +51,12 @@ public class Order {
         this.candidate = candidate;
     }
 
-    public String getPosition() {
-        return position;
+    public String getStaffingLink() {
+        return staffingLink;
     }
 
-    public void setPosition(String position) {
-        this.position = position;
+    public void setStaffingLink(String staffingLink) {
+        this.staffingLink = staffingLink;
     }
 
     public FileUpload getResume() {
@@ -68,5 +73,21 @@ public class Order {
 
     public void setErrors(String errors) {
         this.errors = errors;
+    }
+
+    public String getResumeId() {
+        return resumeId;
+    }
+
+    public void setResumeId(String resumeId) {
+        this.resumeId = resumeId;
+    }
+
+    public String getCodingId() {
+        return codingId;
+    }
+
+    public void setCodingId(String codingId) {
+        this.codingId = codingId;
     }
 }

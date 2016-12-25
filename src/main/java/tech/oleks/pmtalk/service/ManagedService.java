@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Created by alexm on 12/10/16.
@@ -14,22 +15,8 @@ public class ManagedService {
 
     @Inject Configuration config;
 
+    final Logger log = Logger.getLogger(getClass().getName());
+
     public void start() throws IOException {}
     public void stop() {}
-
-    String notNull(String v, String name) {
-        if (v == null || v.isEmpty()) {
-            throw new IllegalArgumentException("'" + name + "' file is null");
-        }
-        return v;
-    }
-
-    /**
-     *
-     * @param t
-     * @return
-     */
-    DateTime toDateTime(org.joda.time.DateTime t) {
-        return new DateTime(t.toString("yyyy-MM-dd'T'HH:mm:ssZZ"));
-    }
 }

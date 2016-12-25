@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * Created by alexm on 12/18/16.
@@ -27,16 +28,18 @@ public class GoogleApiAuthorizationServlet extends AbstractAuthorizationCodeServ
     @Inject
     Configuration config;
 
+    final Logger log = Logger.getLogger(getClass().getName());
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        System.out.println("Credential Loaded from storage");
+        log.info("Credential Loaded from storage");
         Credential credential = getCredential();
 
         if (credential.getExpiresInSeconds() < 1) {
-            System.out.println("Credential has expired, refreshing token...");
-            System.out.println("Credential token refreshed: " + credential.refreshToken());
+            log.info("Credential has expired, refreshing token...");
+            log.info("Credential token refreshed: " + credential.refreshToken());
         }
 
         apiService.setCredential(credential);

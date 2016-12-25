@@ -24,10 +24,8 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.CloseShieldInputStream;
 import tech.oleks.pmtalk.bean.FileUpload;
 import tech.oleks.pmtalk.bean.Order;
-import tech.oleks.pmtalk.service.Configuration;
 import tech.oleks.pmtalk.service.PmTalkService;
 
 import javax.servlet.RequestDispatcher;
@@ -66,8 +64,8 @@ public class PmTalkServlet extends HttpServlet {
           o.setCandidate(candidate);
         }
         else if ("staffing".equals(fieldName)) {
-          String position = Streams.asString(fieldValue);
-          o.setPosition(position);
+          String staffingLink = Streams.asString(fieldValue);
+          o.setStaffingLink(staffingLink);
         }
         else if ("resume".equals(fieldName)){
           FileUpload resume = new FileUpload();
@@ -83,7 +81,7 @@ public class PmTalkServlet extends HttpServlet {
       e.printStackTrace();
     }
 
-    pmTalkService.initiate(o);
+    pmTalkService.minimal(o);
     req.setAttribute("order", o);
     if (o.getErrors() != null) {
       forward("/form.jsp", req, resp);

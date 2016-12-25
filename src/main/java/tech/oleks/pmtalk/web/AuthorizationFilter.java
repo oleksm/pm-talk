@@ -8,6 +8,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Created by alexm on 12/18/16.
@@ -18,6 +19,8 @@ public class AuthorizationFilter implements Filter {
     @Inject
     GoogleApiService apiService;
 
+    final Logger log = Logger.getLogger(getClass().getName());
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
@@ -26,7 +29,7 @@ public class AuthorizationFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         if (apiService.getCredential() == null) {
-            System.out.println("Authorization is required");
+            log.info("Authorization is required");
             ((HttpServletResponse)servletResponse).sendRedirect("/auth");
         }
         else {

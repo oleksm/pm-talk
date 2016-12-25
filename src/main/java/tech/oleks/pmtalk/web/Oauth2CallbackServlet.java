@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  * Created by alexm on 12/18/16.
@@ -27,14 +28,16 @@ public class Oauth2CallbackServlet extends AbstractAuthorizationCodeCallbackServ
     @Inject
     Configuration config;
 
+    final Logger log = Logger.getLogger(getClass().getName());
+
 
     @Override
     protected void onSuccess(HttpServletRequest req, HttpServletResponse resp, Credential credential)
             throws ServletException, IOException {
         apiService.setCredential(credential);
-        System.out.println(credential.getExpirationTimeMilliseconds());
-        System.out.println(credential.getExpiresInSeconds());
-        System.out.println("Successful Authorization!");
+        log.info("" + credential.getExpirationTimeMilliseconds());
+        log.info("" + credential.getExpiresInSeconds());
+        log.info("Successful Authorization!");
         resp.sendRedirect("/");
     }
 

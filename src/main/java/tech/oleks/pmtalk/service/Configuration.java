@@ -19,14 +19,16 @@ public class Configuration {
     String sheetRange;
     String reportRequestedT;
     String reportConductedT;
+    String reportCandidateT;
     String reportResumeT;
     String reportMeetingT;
     String reportPositionT;
     String reportStaffingDeskT;
     String reportRequsitesT;
     String reportCodingT;
-    String[] sendNotificationsTo;
+    String[] shareWithPeople;
     String analyticsId;
+    String emailSubjectT;
 
     public String getCodingTemplateName() {
         return codingTemplateName;
@@ -180,11 +182,27 @@ public class Configuration {
         this.analyticsId = analyticsId;
     }
 
-    public String[] getSendNotificationsTo() {
-        return sendNotificationsTo;
+    public String getEmailSubjectT() {
+        return emailSubjectT;
     }
 
-    public void setSendNotificationsTo(String[] sendNotificationsTo) {
-        this.sendNotificationsTo = sendNotificationsTo;
+    public void setEmailSubjectT(String emailSubjectT) {
+        this.emailSubjectT = emailSubjectT;
+    }
+
+    public String getReportCandidateT() {
+        return reportCandidateT;
+    }
+
+    public void setReportCandidateT(String reportCandidateT) {
+        this.reportCandidateT = reportCandidateT;
+    }
+
+    public String[] getShareWithPeople() {
+        return shareWithPeople;
+    }
+
+    public void setShareWithPeople(String[] shareWithPeople) {
+        this.shareWithPeople = shareWithPeople;
     }
 }
